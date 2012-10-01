@@ -90,6 +90,7 @@ void cterm_select_all(CTerm* term);
 void cterm_select_none(CTerm* term);
 void cterm_copy_text(CTerm* term);
 void cterm_paste_text(CTerm* term);
+void cterm_set_term_title(CTerm* term);
 
 /* config.c */
 bool cterm_register_accel(CTerm* term, const char* keyspec, GCallback callback_func);
@@ -105,6 +106,7 @@ void cterm_ontabchange(GtkNotebook* notebook, GtkNotebookPage* page, guint page_
 void cterm_ontitlechange(VteTerminal* vte, gpointer data);
 gboolean cterm_onwindowclose(GtkWidget* window, GdkEvent* event, gpointer data);
 void cterm_close_dialog_onresponse(GtkWidget* dialog, int response, gpointer data);
+void cterm_set_term_title_dialog_onresponse(GtkWidget* dialog, int response, gpointer data);
 
 /* routines.c */
 VteTerminal* cterm_get_vte(CTerm* term, gint page_num);

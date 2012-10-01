@@ -122,3 +122,37 @@ void cterm_close_dialog_onresponse(GtkWidget* dialog, int response, gpointer dat
         }
     }
 }
+
+void cterm_set_term_title_dialog_onresponse(GtkWidget* dialog, int response, gpointer data) {
+    CTerm* term = (CTerm*) data;
+    GtkWidget* content_area;
+    GtkWidget* widget;
+    GtkWidget* entry = NULL;
+    const gchar* new_title;
+    GList* node;
+    GList* list;
+
+    if(response == GTK_RESPONSE_OK) {
+
+        /* Get entry widget from dialog */
+        content_area = gtk_dialog_get_content_area(GTK_DIALOG(dialog));
+        list = GTK_BOX(content_area)->children;
+        for(node = list; node; node = node->next) {
+            widget = ((GtkBoxChild*) node->data)->widget;
+            if(GTK_IS_ENTRY(widget)) {
+                entry = widget;
+                break;
+            }
+        }
+
+        if(entry) {
+            new_title = gtk_entry_get_text(GTK_ENTRY(entry));
+            gtk_window_set_title(GTK_WINDOW(term->window), new_title);
+        } else {
+            fprintf(stderr, "Error: Could not find entry in dialog widget!\n");
+        }
+
+    }
+
+    gtk_widget_destroy(dialog);
+}

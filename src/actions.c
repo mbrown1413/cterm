@@ -302,3 +302,29 @@ void cterm_paste_text(CTerm* term) {
     VteTerminal* vte = cterm_get_current_vte(term);
     vte_terminal_paste_clipboard(vte);
 }
+
+void cterm_set_term_title(CTerm* term) {
+    GtkWidget* dialog;
+    GtkWidget* entry;
+    GtkWidget* content_area;
+
+    entry = gtk_entry_new();
+    gtk_entry_set_text(GTK_ENTRY(entry), gtk_window_get_title(term->window));
+
+    dialog = gtk_message_dialog_new(term->window,
+                                    GTK_DIALOG_MODAL | GTK_DIALOG_DESTROY_WITH_PARENT,
+                                    GTK_MESSAGE_QUESTION,
+                                    GTK_BUTTONS_OK_CANCEL,
+                                    "Set Terminal Title");
+    gtk_window_set_title(GTK_WINDOW(dialog), "");
+    g_signal_connect(dialog, "response", G_CALLBACK(cterm_set_term_title_dialog_onresponse), (gpointer*) term);
+
+    /* Add Entry Widget */
+    content_area = gtk_dialog_get_content_area(GTK_DIALOG(dialog));
+    gtk_box_pack_start(GTK_BOX(content_area), entry, true, true, 0);
+    gtk_dialog_set_default_response(GTK_DIALOG(dialog), GTK_RESPONSE_OK);
+    gtk_entry_set_activates_default(GTK_ENTRY(entry), true);
+    gtk_widget_show_all(dialog);
+
+    gtk_window_present(GTK_WINDOW(dialog));
+}

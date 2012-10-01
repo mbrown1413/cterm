@@ -34,6 +34,7 @@ const KeyOption key_options[] = {
     {"select_none", cterm_select_none},
     {"copy", cterm_copy_text},
     {"paste", cterm_paste_text},
+    {"set_terminal_title", cterm_set_term_title},
     {NULL, NULL}
 };
 
