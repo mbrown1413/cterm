@@ -1,10 +1,22 @@
 
 #include "cterm.h"
 
+static char* config_file = NULL;
+
+static GOptionEntry options[] = {
+    {"config-file", 'c', 0, G_OPTION_ARG_STRING, &config_file, "Specifies config file to use", "<file>"},
+    { NULL }
+};
+
 int main(int argc, char** argv) {
     CTerm term;
+    GError *gerror = NULL;
     GtkRcStyle* style;
+    GOptionContext* context;
     struct sigaction ignore_children;
+    char* env_cterm_rc;
+    struct passwd* user;
+    int n;
 
     /* Avoid zombies when executing external programs by explicitly setting the
        handler to SIG_IGN */
@@ -12,6 +24,16 @@ int main(int argc, char** argv) {
     ignore_children.sa_flags = 0;
     sigemptyset(&ignore_children.sa_mask);
     sigaction(SIGCHLD, &ignore_children, NULL);
+
+    /* Option Parsing */
+    context = g_option_context_new("- A very simple libvte based terminal");
+    g_option_context_add_main_entries(context, options, NULL);
+    g_option_context_add_group(context, gtk_get_option_group(true));
+    g_option_context_parse(context, &argc, &argv, &gerror);
+    if(gerror != NULL) {
+        fprintf(stderr, "Error parsing arguments: %s\n", gerror->message);
+        exit(1);
+    }
 
     /* Initialize GTK */
     gtk_init(&argc, &argv);
@@ -21,6 +43,21 @@ int main(int argc, char** argv) {
     term.window = (GtkWindow*) gtk_window_new(GTK_WINDOW_TOPLEVEL);
     term.notebook = (GtkNotebook*) gtk_notebook_new();
     term.count = 0;
+
+    /* Set config file */
+    if(config_file != NULL) {
+        /* From -c option */
+        term.config.file_name = config_file;
+    } else if((env_cterm_rc = getenv("CTERM_RC")) != NULL) {
+        /* From CTERM_RC environment variable */
+        term.config.file_name = env_cterm_rc;
+    } else {
+        /* Default to ~/.ctermrc */
+        user = getpwuid(geteuid());
+        n = strlen(user->pw_dir) + strlen(CONFIG_FILE) + 2;
+        term.config.file_name = malloc(sizeof(char) * n);
+        snprintf(term.config.file_name, n, "%s/%s", user->pw_dir, CONFIG_FILE);
+    }
 
     /* Load configuration options */
     cterm_init_config_defaults(&term);

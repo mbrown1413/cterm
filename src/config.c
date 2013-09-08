@@ -62,20 +62,7 @@ bool cterm_register_accel(CTerm* term, const char* keyspec, GCallback callback_f
 }
 
 void cterm_init_config_defaults(CTerm* term) {
-    struct passwd* user;
-    int n;
-    char* config_path_override = getenv("CTERM_RC");
-
-    user = getpwuid(geteuid());
-
-    /* Default configuration file in ~/.ctermrc */
-    if(config_path_override == NULL) {
-        n = strlen(user->pw_dir) + strlen(CONFIG_FILE) + 2;
-        term->config.file_name = malloc(sizeof(char) * n);
-        snprintf(term->config.file_name, n, "%s/%s", user->pw_dir, CONFIG_FILE);
-    } else {
-        term->config.file_name = config_path_override;
-    }
+    struct passwd* user = getpwuid(geteuid());
 
     /* No keybindings */
     term->config.keys = NULL;
