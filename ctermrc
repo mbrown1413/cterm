@@ -50,6 +50,10 @@ background = #000
 transparent = false
 opacity = 80
 
+# Shell
+# Uses the default shell if blank. Shell arguments are allowed.
+shell =
+
 # Run this program and pass the selected text to it via stdin when key_run is
 # activated or the left mouse button is clicked
 external_program = cterm_run

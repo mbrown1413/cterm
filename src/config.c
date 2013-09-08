@@ -219,6 +219,7 @@ static enum cterm_length_unit cterm_config_unit_value(const char* value) {
 static bool cterm_config_process_line(CTerm* term, const char* option, const char* value, unsigned short line_num) {
     int i;
     bool found_option = true;
+    GError* gerror = NULL;
 
     /* Misc options */
     if(strcmp(option, "word_chars") == 0) {
@@ -246,6 +247,21 @@ static bool cterm_config_process_line(CTerm* term, const char* option, const cha
         if(term->config.height_unit == -1) {
             fprintf(stderr, "Unknown unit in value '%s' at line %d.\n", value, line_num);
             return false;
+        }
+    } else if(strcmp(option, "shell") == 0) {
+        if(term->config.spawn_args != NULL) {
+            g_strfreev(term->config.spawn_args);
+        }
+        g_shell_parse_argv(value, NULL, &term->config.spawn_args, &gerror);
+        if(gerror != NULL) {
+            if(gerror->code == G_SHELL_ERROR_EMPTY_STRING) {
+                term->config.spawn_args = NULL;
+                g_error_free(gerror);
+            } else {
+                fprintf(stderr, "Error processing shell value at line %d: %s\n", line_num, gerror->message);
+                g_error_free(gerror);
+                return false;
+            }
         }
     } else if(strcmp(option, "external_program") == 0) {
         term->config.external_program = strdup(value);
