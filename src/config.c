@@ -5,7 +5,9 @@ static char* cterm_read_line(FILE* f);
 static void cterm_cleanse_config(CTerm* term);
 static bool cterm_config_true_value(const char* value);
 static enum cterm_length_unit cterm_config_unit_value(const char* value);
+static void cterm_config_error(unsigned short line_num, const char* error_fmt, ...);
 static bool cterm_config_process_line(CTerm* term, const char* option, const char* value, unsigned short line_num);
+static int cterm_config_parse_line(char* line, unsigned short line_num, char** option_out, char** value_out);
 
 typedef struct {
     char* name;  /* Option will be "key_<name>" */
@@ -203,6 +205,20 @@ static enum cterm_length_unit cterm_config_unit_value(const char* value) {
     }
 }
 
+static void cterm_config_error(unsigned short line_num, const char* error_fmt, ...) {
+    va_list args;
+    va_start(args, error_fmt);
+
+    if(line_num == -1) {
+        fprintf(stderr, "Error on line %d: ", line_num);
+    } else {
+        fprintf(stderr, "Error while parsing config from --option argument: ");
+    }
+    vfprintf(stderr, error_fmt, args);
+    fprintf(stderr, "\n");
+    va_end(args);
+}
+
 static bool cterm_config_process_line(CTerm* term, const char* option, const char* value, unsigned short line_num) {
     int i;
     bool found_option = true;
@@ -225,14 +241,14 @@ static bool cterm_config_process_line(CTerm* term, const char* option, const cha
         term->config.initial_width = atoi(value);
         term->config.width_unit = cterm_config_unit_value(value);
         if(term->config.width_unit == -1) {
-            fprintf(stderr, "Unknown unit in value '%s' at line %d.\n", value, line_num);
+            cterm_config_error(line_num, "Unknown unit in value \"%s\". Valid units are \"px\" and \"char\".", value);
             return false;
         }
     } else if(strcmp(option, "initial_height") == 0) {
         term->config.initial_height = atoi(value);
         term->config.height_unit = cterm_config_unit_value(value);
         if(term->config.height_unit == -1) {
-            fprintf(stderr, "Unknown unit in value '%s' at line %d.\n", value, line_num);
+            cterm_config_error(line_num, "Unknown unit in value \"%s\". Valid units are \"px\" and \"char\".", value);
             return false;
         }
     } else if(strcmp(option, "shell") == 0) {
@@ -245,7 +261,7 @@ static bool cterm_config_process_line(CTerm* term, const char* option, const cha
                 term->config.spawn_args = NULL;
                 g_error_free(gerror);
             } else {
-                fprintf(stderr, "Error processing shell value at line %d: %s\n", line_num, gerror->message);
+                cterm_config_error(line_num, "Could not parse shell value. %s", gerror->message);
                 g_error_free(gerror);
                 return false;
             }
@@ -269,7 +285,7 @@ static bool cterm_config_process_line(CTerm* term, const char* option, const cha
         } else if(strcmp(value, "ascii_delete") == 0) {
             term->config.backspace_behavior = VTE_ERASE_ASCII_DELETE;
         } else {
-            fprintf(stderr, "Invalid value '%s' for backspace behavior at line %d.\n", value, line_num);
+            cterm_config_error(line_num, "Invalid value \"%s\" for backspace behavior. Valid values are \"auto\", \"ascii_backspace\" or \"ascii_delete\".", value);
         }
 
         /* Confirm close */
@@ -333,7 +349,7 @@ static bool cterm_config_process_line(CTerm* term, const char* option, const cha
             }
             if(strcmp(option+4, key_option.name) == 0) {
                 if(!cterm_register_accel(term, value, G_CALLBACK(key_option.callback))) {
-                    fprintf(stderr, "Key acceleration '%s' could not be parsed at line %d\n", value, line_num);
+                    cterm_config_error(line_num, "Key acceleration \"%s\" could not be parsed", value);
                     return false;
                 }
                 found_option = true;
@@ -347,14 +363,45 @@ static bool cterm_config_process_line(CTerm* term, const char* option, const cha
 
     /* Unknown option */
     if(!found_option) {
-        fprintf(stderr, "Unknown config option '%s' at line %d\n", option, line_num);
+        cterm_config_error(line_num, "Unknown config option \"%s\".", option);
         return false;
     }
 
     return true;
 }
 
-void cterm_reread_config(CTerm* term) {
+static int cterm_config_parse_line(char* line, unsigned short line_num, char** option_out, char** value_out) {
+    char* option = line;
+    char* value;
+    cterm_string_strip(line);
+
+    /* Comment */
+    if(line[0] == '#' || line[0] == '\0') {
+        line[0] = '\0';
+        *option_out = line;
+        return 0;
+    }
+
+    /* Normal line */
+    value = strchr(line, '=');
+    if(value == NULL) {
+        cterm_config_error(line_num, "Expected \"=\" before config value.");
+        line[0] = '\0';
+        *option_out = line;
+        return 1;
+    }
+
+    /* Split string */
+    *value = '\0';
+    value++;
+    cterm_string_strip(option);
+    cterm_string_strip(value);
+    *option_out = option;
+    *value_out = value;
+    return 0;
+}
+
+void cterm_reread_config(CTerm* term, const char** extra_lines) {
     FILE* conf;
     char *option, *value;
     char* line;
@@ -371,28 +418,12 @@ void cterm_reread_config(CTerm* term) {
     } else {
         while((line = cterm_read_line(conf)) != NULL) {
             line_num++;
-            cterm_string_strip(line);
 
-            /* Comment */
-            if(line[0] == '#' || line[0] == '\0') {
+            config_error_count += cterm_config_parse_line(line, line_num, &option, &value);
+            if(*option == '\0') {
                 free(line);
                 continue;
             }
-
-            /* Normal line */
-            option = line;
-            value = strchr(line, '=');
-            if(value == NULL) {
-                fprintf(stderr, "Syntax error at line %d\n", line_num);
-                free(line);
-                continue;
-            }
-
-            /* Split string */
-            *value = '\0';
-            value++;
-            cterm_string_strip(option);
-            cterm_string_strip(value);
 
             /* Process option/value pair */
             if(!cterm_config_process_line(term, option, value, line_num)) {
@@ -408,17 +439,45 @@ void cterm_reread_config(CTerm* term) {
 
         fclose(conf);
 
-        /* Previous Errors? */
-        if(config_error_count) {
-            char plural = 's';
-            if(config_error_count == 1) {
-                plural = '\0';
-            }
+    }
 
-            fprintf(stderr, "Error%c in config file: \"%s\".\n", plural, term->config.file_name);
-            fprintf(stderr, "Exiting...\n");
-            exit(1);
+    /* Previous Errors? */
+    if(config_error_count) {
+        char plural = 's';
+        if(config_error_count == 1) {
+            plural = '\0';
         }
+
+        fprintf(stderr, "Error%c in config file: \"%s\".\n", plural, term->config.file_name);
+        fprintf(stderr, "Exiting...\n");
+        exit(1);
+    }
+
+    /* Read extra lines */
+    while(extra_lines != NULL && *extra_lines != NULL) {
+
+        config_error_count += cterm_config_parse_line(*extra_lines, -1, &option, &value);
+        if(*option == '\0') {
+            extra_lines++;
+            continue;
+        }
+
+        /* Process option/value pair */
+        if(!cterm_config_process_line(term, option, value, -1)) {
+            config_error_count++;
+        }
+
+        if(strcmp(option, "key_reload") == 0) {
+            registered_reload_key = true;
+        }
+
+        extra_lines++;
+    }
+
+    /* Previous Errors? */
+    if(config_error_count) {
+        fprintf(stderr, "Exiting...\n");
+        exit(1);
     }
 
     /* Set a default "reload" config shortcut if one is not provided */

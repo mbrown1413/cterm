@@ -2,9 +2,11 @@
 #include "cterm.h"
 
 static char* config_file = NULL;
+static char** extra_opts = NULL;
 
 static GOptionEntry options[] = {
     {"config-file", 'c', 0, G_OPTION_ARG_STRING, &config_file, "Specifies config file to use", "<file>"},
+    {"option", 'o', 0, G_OPTION_ARG_STRING_ARRAY, &extra_opts, "Specifies a single config option in the form of \"option=value\". Any options available in the config file can be overwritten by this. Note: Reloading the configuration will overwrite any options given here.", "\"<option> = <value>\""},
     { NULL }
 };
 
@@ -61,7 +63,10 @@ int main(int argc, char** argv) {
 
     /* Load configuration options */
     cterm_init_config_defaults(&term);
-    cterm_reread_config(&term);
+    cterm_reread_config(&term, extra_opts);
+    if(extra_opts != NULL) {
+        g_strfreev(extra_opts);
+    }
 
     /* Set title */
     gtk_window_set_title(term.window, "cterm");
