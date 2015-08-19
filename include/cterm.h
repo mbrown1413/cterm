@@ -70,27 +70,27 @@ typedef struct {
 } CTerm;
 
 /* actions.c */
-void cterm_switch_to_tab_1(CTerm* term);
-void cterm_switch_to_tab_2(CTerm* term);
-void cterm_switch_to_tab_3(CTerm* term);
-void cterm_switch_to_tab_4(CTerm* term);
-void cterm_switch_to_tab_5(CTerm* term);
-void cterm_switch_to_tab_6(CTerm* term);
-void cterm_switch_to_tab_7(CTerm* term);
-void cterm_switch_to_tab_8(CTerm* term);
-void cterm_switch_to_tab_9(CTerm* term);
-void cterm_switch_to_tab_10(CTerm* term);
-void cterm_open_tab(CTerm* term);
-void cterm_close_tab(CTerm* term);
-void cterm_reload(CTerm* term);
-void cterm_run_external(CTerm* term);
-void cterm_increase_font_size(CTerm* term);
-void cterm_decrease_font_size(CTerm* term);
-void cterm_select_all(CTerm* term);
-void cterm_select_none(CTerm* term);
-void cterm_copy_text(CTerm* term);
-void cterm_paste_text(CTerm* term);
-void cterm_set_term_title(CTerm* term);
+bool cterm_switch_to_tab_1(CTerm* term);
+bool cterm_switch_to_tab_2(CTerm* term);
+bool cterm_switch_to_tab_3(CTerm* term);
+bool cterm_switch_to_tab_4(CTerm* term);
+bool cterm_switch_to_tab_5(CTerm* term);
+bool cterm_switch_to_tab_6(CTerm* term);
+bool cterm_switch_to_tab_7(CTerm* term);
+bool cterm_switch_to_tab_8(CTerm* term);
+bool cterm_switch_to_tab_9(CTerm* term);
+bool cterm_switch_to_tab_10(CTerm* term);
+bool cterm_open_tab(CTerm* term);
+bool cterm_close_tab(CTerm* term);
+bool cterm_reload(CTerm* term);
+bool cterm_run_external(CTerm* term);
+bool cterm_increase_font_size(CTerm* term);
+bool cterm_decrease_font_size(CTerm* term);
+bool cterm_select_all(CTerm* term);
+bool cterm_select_none(CTerm* term);
+bool cterm_copy_text(CTerm* term);
+bool cterm_paste_text(CTerm* term);
+bool cterm_set_term_title(CTerm* term);
 
 /* config.c */
 bool cterm_register_accel(CTerm* term, const char* keyspec, GCallback callback_func);

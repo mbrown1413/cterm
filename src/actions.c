@@ -15,44 +15,54 @@ static GRegex* url_regex;
 
 static void cterm_set_vte_properties(CTerm* term, VteTerminal* vte);
 
-void cterm_switch_to_tab_1(CTerm* term) {
+bool cterm_switch_to_tab_1(CTerm* term) {
     gtk_notebook_set_current_page(term->notebook, 0);
+    return true;
 }
 
-void cterm_switch_to_tab_2(CTerm* term) {
+bool cterm_switch_to_tab_2(CTerm* term) {
     gtk_notebook_set_current_page(term->notebook, 1);
+    return true;
 }
 
-void cterm_switch_to_tab_3(CTerm* term) {
+bool cterm_switch_to_tab_3(CTerm* term) {
     gtk_notebook_set_current_page(term->notebook, 2);
+    return true;
 }
 
-void cterm_switch_to_tab_4(CTerm* term) {
+bool cterm_switch_to_tab_4(CTerm* term) {
     gtk_notebook_set_current_page(term->notebook, 3);
+    return true;
 }
 
-void cterm_switch_to_tab_5(CTerm* term) {
+bool cterm_switch_to_tab_5(CTerm* term) {
     gtk_notebook_set_current_page(term->notebook, 4);
+    return true;
 }
 
-void cterm_switch_to_tab_6(CTerm* term) {
+bool cterm_switch_to_tab_6(CTerm* term) {
     gtk_notebook_set_current_page(term->notebook, 5);
+    return true;
 }
 
-void cterm_switch_to_tab_7(CTerm* term) {
+bool cterm_switch_to_tab_7(CTerm* term) {
     gtk_notebook_set_current_page(term->notebook, 6);
+    return true;
 }
 
-void cterm_switch_to_tab_8(CTerm* term) {
+bool cterm_switch_to_tab_8(CTerm* term) {
     gtk_notebook_set_current_page(term->notebook, 7);
+    return true;
 }
 
-void cterm_switch_to_tab_9(CTerm* term) {
+bool cterm_switch_to_tab_9(CTerm* term) {
     gtk_notebook_set_current_page(term->notebook, 8);
+    return true;
 }
 
-void cterm_switch_to_tab_10(CTerm* term) {
+bool cterm_switch_to_tab_10(CTerm* term) {
     gtk_notebook_set_current_page(term->notebook, 9);
+    return true;
 }
 
 static void cterm_set_vte_properties(CTerm* term, VteTerminal* vte) {
@@ -100,7 +110,7 @@ static void cterm_set_vte_properties(CTerm* term, VteTerminal* vte) {
 
 }
 
-void cterm_open_tab(CTerm* term) {
+bool cterm_open_tab(CTerm* term) {
     VteTerminal* new_vte;
     GtkWidget* box;
     GtkWidget* scrollbar;
@@ -171,9 +181,10 @@ void cterm_open_tab(CTerm* term) {
     if(term->count == 2) {
         gtk_notebook_set_show_tabs(term->notebook, TRUE);
     }
+    return true;
 }
 
-void cterm_close_tab(CTerm* term) {
+bool cterm_close_tab(CTerm* term) {
     VteTerminal* vte = cterm_get_current_vte(term);
     pid_t* pid = (pid_t*) g_hash_table_lookup(term->terminal_procs, (gpointer)vte);
     GtkWidget* dialog;
@@ -200,9 +211,10 @@ void cterm_close_tab(CTerm* term) {
         kill(*pid, SIGKILL);
 
     }
+    return true;
 }
 
-void cterm_reload(CTerm* term) {
+bool cterm_reload(CTerm* term) {
     VteTerminal* vte;
     GtkWidget* scrollbar;
     GtkWidget* box;
@@ -244,9 +256,10 @@ void cterm_reload(CTerm* term) {
 
         g_list_free(children);
     }
+    return true;
 }
 
-void cterm_run_external(CTerm* term) {
+bool cterm_run_external(CTerm* term) {
     VteTerminal* vte = cterm_get_current_vte(term);
     char* data;
     int fp[2];
@@ -273,37 +286,44 @@ void cterm_run_external(CTerm* term) {
             close(fp[1]);
         }
     }
+    return true;
 }
 
-void cterm_increase_font_size(CTerm* term) {
+bool cterm_increase_font_size(CTerm* term) {
     cterm_set_font_size_relative(term, (gint) 2*PANGO_SCALE);
+    return true;
 }
 
-void cterm_decrease_font_size(CTerm* term) {
+bool cterm_decrease_font_size(CTerm* term) {
     cterm_set_font_size_relative(term, (gint) -2*PANGO_SCALE);
+    return true;
 }
 
-void cterm_select_all(CTerm* term) {
+bool cterm_select_all(CTerm* term) {
     VteTerminal* vte = cterm_get_current_vte(term);
     vte_terminal_select_all(vte);
+    return true;
 }
 
-void cterm_select_none(CTerm* term) {
+bool cterm_select_none(CTerm* term) {
     VteTerminal* vte = cterm_get_current_vte(term);
     vte_terminal_select_none(vte);
+    return true;
 }
 
-void cterm_copy_text(CTerm* term) {
+bool cterm_copy_text(CTerm* term) {
     VteTerminal* vte = cterm_get_current_vte(term);
     vte_terminal_copy_clipboard(vte);
+    return true;
 }
 
-void cterm_paste_text(CTerm* term) {
+bool cterm_paste_text(CTerm* term) {
     VteTerminal* vte = cterm_get_current_vte(term);
     vte_terminal_paste_clipboard(vte);
+    return true;
 }
 
-void cterm_set_term_title(CTerm* term) {
+bool cterm_set_term_title(CTerm* term) {
     GtkWidget* dialog;
     GtkWidget* entry;
     GtkWidget* content_area;
@@ -327,4 +347,5 @@ void cterm_set_term_title(CTerm* term) {
     gtk_widget_show_all(dialog);
 
     gtk_window_present(GTK_WINDOW(dialog));
+    return true;
 }

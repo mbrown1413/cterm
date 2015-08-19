@@ -11,7 +11,7 @@ static int cterm_config_parse_line(char* line, unsigned short line_num, char** o
 
 typedef struct {
     char* name;  /* Option will be "key_<name>" */
-    void (*callback)(CTerm*); /* Called when accel is pressed */
+    bool (*callback)(CTerm*); /* Called when accel is pressed */
 } KeyOption;
 
 /* Stores possible options for key accelerations. */
