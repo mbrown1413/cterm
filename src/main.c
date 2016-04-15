@@ -69,7 +69,7 @@ int main(int argc, char** argv) {
     }
 
     /* Set title */
-    gtk_window_set_title(term.window, "cterm");
+    gtk_window_set_title(term.window, term.config.initial_title);
 
     /* Optionally hide window from taskbar */
     if(getenv("CTERM_HIDE") != NULL) {

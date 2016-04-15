@@ -84,6 +84,9 @@ void cterm_init_config_defaults(CTerm* term) {
     /* Enable scrollbar */
     term->config.scrollbar = GTK_POLICY_ALWAYS;
 
+    /* Default terminal title */
+    term->config.initial_title = "cterm";
+
     /* Disable transparency */
     term->config.transparent = false;
     term->config.opacity = 100;
@@ -276,6 +279,8 @@ static bool cterm_config_process_line(CTerm* term, const char* option, const cha
         term->config.audible_bell = cterm_config_true_value(value);
     } else if(strcmp(option, "visible_bell") == 0) {
         term->config.visible_bell = cterm_config_true_value(value);
+    } else if(strcmp(option, "initial_title") == 0) {
+        term->config.initial_title = strdup(value);
 
     } else if(strcmp(option, "backspace_behavior") == 0) {
         if(strcmp(value, "auto") == 0) {
@@ -401,7 +406,7 @@ static int cterm_config_parse_line(char* line, unsigned short line_num, char** o
     return 0;
 }
 
-void cterm_reread_config(CTerm* term, const char** extra_lines) {
+void cterm_reread_config(CTerm* term, char** extra_lines) {
     FILE* conf;
     char *option, *value;
     char* line;

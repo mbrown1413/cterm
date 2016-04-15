@@ -40,6 +40,7 @@ typedef struct {
         char* word_chars;
         glong scrollback;
         GtkPolicyType scrollbar;
+        char* initial_title;
 
         bool transparent;
         float opacity;
@@ -95,7 +96,7 @@ bool cterm_set_term_title(CTerm* term);
 /* config.c */
 bool cterm_register_accel(CTerm* term, const char* keyspec, GCallback callback_func);
 void cterm_init_config_defaults(CTerm* term);
-void cterm_reread_config(CTerm* term, const char** extra_lines);
+void cterm_reread_config(CTerm* term, char** extra_lines);
 
 /* events.c */
 gboolean cterm_onfocus(GtkWidget* w, GdkEventFocus* e, gpointer data);
