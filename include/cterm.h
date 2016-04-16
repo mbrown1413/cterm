@@ -19,7 +19,7 @@
 
 #define CONFIG_FILE ".ctermrc"
 
-/* Terminal size units for measuring lengths */
+// Terminal size units for measuring lengths
 enum cterm_length_unit {
     CTERM_UNIT_PX,
     CTERM_UNIT_CHAR
@@ -70,7 +70,7 @@ typedef struct {
     } config;
 } CTerm;
 
-/* actions.c */
+// actions.c
 bool cterm_switch_to_tab_1(CTerm* term);
 bool cterm_switch_to_tab_2(CTerm* term);
 bool cterm_switch_to_tab_3(CTerm* term);
@@ -93,12 +93,12 @@ bool cterm_copy_text(CTerm* term);
 bool cterm_paste_text(CTerm* term);
 bool cterm_set_term_title(CTerm* term);
 
-/* config.c */
+// config.c
 bool cterm_register_accel(CTerm* term, const char* keyspec, GCallback callback_func);
 void cterm_init_config_defaults(CTerm* term);
 void cterm_reread_config(CTerm* term, char** extra_lines);
 
-/* events.c */
+// events.c
 gboolean cterm_onfocus(GtkWidget* w, GdkEventFocus* e, gpointer data);
 gboolean cterm_onclick(GtkWidget* w, GdkEventButton* e, gpointer data);
 void cterm_onbeep(VteTerminal * vte, gpointer data);
@@ -109,7 +109,7 @@ gboolean cterm_onwindowclose(GtkWidget* window, GdkEvent* event, gpointer data);
 void cterm_close_dialog_onresponse(GtkWidget* dialog, int response, gpointer data);
 void cterm_set_term_title_dialog_onresponse(GtkWidget* dialog, int response, gpointer data);
 
-/* routines.c */
+// routines.c
 VteTerminal* cterm_get_vte(CTerm* term, gint page_num);
 VteTerminal* cterm_get_current_vte(CTerm* term);
 void cterm_string_tolower(char* buffer);

@@ -10,11 +10,11 @@ static bool cterm_config_process_line(CTerm* term, const char* option, const cha
 static int cterm_config_parse_line(char* line, unsigned short line_num, char** option_out, char** value_out);
 
 typedef struct {
-    char* name;  /* Option will be "key_<name>" */
-    bool (*callback)(CTerm*); /* Called when accel is pressed */
+    char* name;  // Option will be "key_<name>"
+    bool (*callback)(CTerm*); // Called when accel is pressed
 } KeyOption;
 
-/* Stores possible options for key accelerations. */
+// Stores possible options for key accelerations.
 const KeyOption key_options[] = {
     {"tab_1", cterm_switch_to_tab_1},
     {"tab_2", cterm_switch_to_tab_2},
@@ -45,7 +45,7 @@ bool cterm_register_accel(CTerm* term, const char* keyspec, GCallback callback_f
     GdkModifierType mod;
     GClosure* closure;
 
-    /* Empty key spec */
+    // Empty key spec
     if(keyspec[0] == '\0') {
         return true;
     }
@@ -66,57 +66,29 @@ bool cterm_register_accel(CTerm* term, const char* keyspec, GCallback callback_f
 void cterm_init_config_defaults(CTerm* term) {
     struct passwd* user = getpwuid(geteuid());
 
-    /* No keybindings */
     term->config.keys = NULL;
-
-    /* Run bash by default */
     term->config.spawn_args = NULL;
-
-    /* Default initial directory is users home directory */
-    term->config.initial_directory = strdup(user->pw_dir);
-
-    /* Double click characters chars */
+    term->config.initial_directory = strdup(user->pw_dir);  // Home directory
     term->config.word_chars = NULL;
-
-    /* 1000 lines of scrollback */
     term->config.scrollback = 1000;
-
-    /* Enable scrollbar */
     term->config.scrollbar = GTK_POLICY_ALWAYS;
-
-    /* Default terminal title */
     term->config.initial_title = "cterm";
-
-    /* Disable transparency */
     term->config.transparent = false;
     term->config.opacity = 100;
-
-    /* Default font */
     term->config.font = NULL;
-
-    /* Default terminal size */
     term->config.width_unit = CTERM_UNIT_PX;
     term->config.height_unit = CTERM_UNIT_PX;
     term->config.initial_width = 600;
     term->config.initial_height = 400;
-
-    /* Default (no) programs */
     term->config.external_program = NULL;
     term->config.url_program = NULL;
     term->config.underline_urls = true;
-
-    /* Disable audible and visible bell */
     term->config.audible_bell = false;
     term->config.visible_bell = false;
-
-    /* Automatic backspace key behavior */
     term->config.backspace_behavior = VTE_ERASE_AUTO;
-
-    /* Confirm close */
     term->config.confirm_close_window = true;
     term->config.confirm_close_tab = true;
 
-    /* Initialize colors */
     gdk_color_parse("#000", &(term->config.background));
     gdk_color_parse("#FFF", &(term->config.foreground));
     gdk_color_parse("#000", &(term->config.colors[0]));
@@ -193,7 +165,7 @@ static bool cterm_config_true_value(const char* value) {
 static enum cterm_length_unit cterm_config_unit_value(const char* value) {
     char* copy = strdup(value);
 
-    /* Skip number to get to unit */
+    // Skip number to get to unit
     while(*copy != '\0' && !isalpha(*copy)) {
         copy++;
     }
@@ -227,7 +199,7 @@ static bool cterm_config_process_line(CTerm* term, const char* option, const cha
     bool found_option = true;
     GError* gerror = NULL;
 
-    /* Misc options */
+    // Misc options
     if(strcmp(option, "word_chars") == 0) {
         term->config.word_chars = strdup(value);
     } else if(strcmp(option, "scrollback") == 0) {
@@ -293,20 +265,20 @@ static bool cterm_config_process_line(CTerm* term, const char* option, const cha
             cterm_config_error(line_num, "Invalid value \"%s\" for backspace behavior. Valid values are \"auto\", \"ascii_backspace\" or \"ascii_delete\".", value);
         }
 
-        /* Confirm close */
+        // Confirm close
     } else if(strcmp(option, "confirm_close_window") == 0) {
         term->config.confirm_close_window = cterm_config_true_value(value);
     } else if(strcmp(option, "confirm_close_tab") == 0) {
         term->config.confirm_close_tab = cterm_config_true_value(value);
 
-        /* Transparency options */
+        // Transparency options
     } else if(strcmp(option, "transparent") == 0) {
         term->config.transparent = cterm_config_true_value(value);
     } else if(strcmp(option, "opacity") == 0) {
         float v = atoi(value) / 100.0;
         term->config.opacity = (v < 0) ? 0 : ((v > 1) ? 1 : v);
 
-        /* Color options */
+        // Color options
     } else if(strcmp(option, "foreground") == 0) {
         gdk_color_parse(value, &(term->config.foreground));
     } else if(strcmp(option, "background") == 0) {
@@ -344,7 +316,7 @@ static bool cterm_config_process_line(CTerm* term, const char* option, const cha
     } else if(strcmp(option, "color_15") == 0) {
         gdk_color_parse(value, &(term->config.colors[15]));
 
-        /* Accels that start with "key_" */
+        // Accels that start with "key_"
     } else if(strncmp(option, "key_", 4) == 0) {
         found_option = false;
         for(i=0; ; i++) {
@@ -366,7 +338,7 @@ static bool cterm_config_process_line(CTerm* term, const char* option, const cha
         found_option = false;
     }
 
-    /* Unknown option */
+    // Unknown option
     if(!found_option) {
         cterm_config_error(line_num, "Unknown config option \"%s\".", option);
         return false;
@@ -380,14 +352,14 @@ static int cterm_config_parse_line(char* line, unsigned short line_num, char** o
     char* value;
     cterm_string_strip(line);
 
-    /* Comment */
+    // Comment
     if(line[0] == '#' || line[0] == '\0') {
         line[0] = '\0';
         *option_out = line;
         return 0;
     }
 
-    /* Normal line */
+    // Normal line
     value = strchr(line, '=');
     if(value == NULL) {
         cterm_config_error(line_num, "Expected \"=\" before config value.");
@@ -396,7 +368,7 @@ static int cterm_config_parse_line(char* line, unsigned short line_num, char** o
         return 1;
     }
 
-    /* Split string */
+    // Split string
     *value = '\0';
     value++;
     cterm_string_strip(option);
@@ -414,7 +386,7 @@ void cterm_reread_config(CTerm* term, char** extra_lines) {
     int config_error_count = 0;
     bool registered_reload_key = false;
 
-    /* Prepare for configuration */
+    // Prepare for configuration
     cterm_cleanse_config(term);
 
     conf = fopen(term->config.file_name, "r");
@@ -430,7 +402,7 @@ void cterm_reread_config(CTerm* term, char** extra_lines) {
                 continue;
             }
 
-            /* Process option/value pair */
+            // Process option/value pair
             if(!cterm_config_process_line(term, option, value, line_num)) {
                 config_error_count++;
             }
@@ -446,7 +418,7 @@ void cterm_reread_config(CTerm* term, char** extra_lines) {
 
     }
 
-    /* Previous Errors? */
+    // Previous Errors?
     if(config_error_count) {
         char plural = 's';
         if(config_error_count == 1) {
@@ -458,7 +430,7 @@ void cterm_reread_config(CTerm* term, char** extra_lines) {
         exit(1);
     }
 
-    /* Read extra lines */
+    // Read extra lines
     while(extra_lines != NULL && *extra_lines != NULL) {
 
         config_error_count += cterm_config_parse_line(*extra_lines, -1, &option, &value);
@@ -467,7 +439,7 @@ void cterm_reread_config(CTerm* term, char** extra_lines) {
             continue;
         }
 
-        /* Process option/value pair */
+        // Process option/value pair
         if(!cterm_config_process_line(term, option, value, -1)) {
             config_error_count++;
         }
@@ -479,13 +451,13 @@ void cterm_reread_config(CTerm* term, char** extra_lines) {
         extra_lines++;
     }
 
-    /* Previous Errors? */
+    // Previous Errors?
     if(config_error_count) {
         fprintf(stderr, "Exiting...\n");
         exit(1);
     }
 
-    /* Set a default "reload" config shortcut if one is not provided */
+    // Set a default "reload" config shortcut if one is not provided
     if(!registered_reload_key) {
         cterm_register_accel(term, "<Alt>r", G_CALLBACK(cterm_reload));
     }

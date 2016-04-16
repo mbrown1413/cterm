@@ -37,25 +37,24 @@ void cterm_string_tolower(char* buffer) {
 void cterm_string_strip(char* buffer) {
     int i, start;
 
-    /* skip empty strings */
+    // skip empty strings
     if(buffer[0] == '\0') {
         return;
     }
 
-    /* Work forward in the string until we find a non blank character */
+    // Work forward in the string until we find a non blank character
     for(start = 0; isspace(buffer[start]); start++);
 
-    /* Move string starting with first non blank character to the beginning of
-       the buffer */
+    // Move string starting with first non blank character to the beginning of
+    // the buffer.
     for(i = 0; buffer[start + i] != '\0'; i++) {
         buffer[i] = buffer[start + i];
     }
     buffer[i--] = '\0';
 
-    /* Work backwards from the end of the buffer until we reach a non blank
-       character */
+    // Work backwards from the end of the buffer until non blank character.
     while(i >= 0 && isspace(buffer[i])) {
-        /* Override each space with a null terminator */
+        // Override each space with a null terminator
         buffer[i--] = '\0';
     }
 }
@@ -113,8 +112,8 @@ void cterm_set_font_size(CTerm* term, gint size) {
     VteTerminal* vte = cterm_get_vte(term, 0);
     PangoFontDescription* font;
     gint new_width, new_height;
-    /* TODO: If anybody knows why column and row counts need to be +1 here,
-             please explain it! */
+    // TODO: If anybody knows why column and row counts need to be +1 here,
+    //       please explain it!
     glong initial_columns = vte_terminal_get_column_count(vte) + 1;
     glong initial_rows = vte_terminal_get_row_count(vte) + 1;
 
@@ -122,7 +121,7 @@ void cterm_set_font_size(CTerm* term, gint size) {
         return;
     }
 
-    /* Resize all terminals */
+    // Resize all terminals
     for(int i = 0; i < term->count; i++) {
         vte = cterm_get_vte(term, i);
         font = pango_font_description_copy_static(vte_terminal_get_font(vte));
@@ -130,10 +129,10 @@ void cterm_set_font_size(CTerm* term, gint size) {
         vte_terminal_set_font(vte, font);
     }
 
-    /* Resize Window
-       If the initial width/height was specified in pixels, don't resize.  If
-       initial width/height was specified in chars, resize so there are the
-       same number of chars in that dimmension. */
+    // Resize Window
+    // If the initial width/height was specified in pixels, don't resize. If
+    // initial width/height was specified in chars, resize so there are the
+    // same number of chars in that dimmension.
     if(term->config.width_unit == CTERM_UNIT_CHAR) {
         new_width = initial_columns;
     } else {
@@ -167,7 +166,7 @@ void cterm_set_term_size(CTerm* term,
     int char_width = vte_terminal_get_char_width(VTE_TERMINAL(vte));
     int char_height = vte_terminal_get_char_height(VTE_TERMINAL(vte));
 
-    /* Convert chars to pixels */
+    // Convert chars to pixels
     if(term->config.width_unit == CTERM_UNIT_CHAR) {
         new_width *= char_width;
     }
@@ -175,7 +174,7 @@ void cterm_set_term_size(CTerm* term,
         new_height *= char_height;
     }
 
-    /* Add size of tab bar and widgets other than vte terminal */
+    // Add size of tab bar and widgets other than vte terminal
     gtk_widget_size_request(GTK_WIDGET(term->window), &window_requisition);
     gtk_widget_size_request(GTK_WIDGET(vte), &term_requisition);
     if(window_requisition.width > 0 && window_requisition.height > 0) {
@@ -183,13 +182,13 @@ void cterm_set_term_size(CTerm* term,
         new_height += window_requisition.height - term_requisition.height;
     }
 
-    /* Add border width/height */
+    // Add border width/height
     gtk_widget_style_get(GTK_WIDGET(vte), "inner-border", &border, NULL);
     hints.base_width = border->left + border->right;
     hints.base_height = border->top + border->bottom;
     gtk_border_free(border);
 
-    /* Set geometry hints */
+    // Set geometry hints
     hints.base_width = 0;
     hints.base_height = 0;
     hints.width_inc = char_width;
@@ -207,7 +206,7 @@ void cterm_set_term_size(CTerm* term,
         vte_terminal_set_size(vte, new_width/char_width, new_height/char_height);
     }
 
-    /* Resize Window */
+    // Resize Window
     gtk_window_resize(GTK_WINDOW(term->window), new_width, new_height);
 
 }
@@ -217,7 +216,7 @@ void cterm_open_url(CTerm* term, char* url) {
         return;
     }
     if(fork() == 0) {
-        /* Child */
+        // Child
         execlp(term->config.url_program, term->config.url_program, url, NULL);
         perror("Could not open program");
         _exit(-1);

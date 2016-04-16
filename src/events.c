@@ -83,16 +83,16 @@ gboolean cterm_onwindowclose(GtkWidget* window, GdkEvent* event, gpointer data) 
 
     if(term->config.confirm_close_window && cterm_term_has_foreground_process(term)) {
 
-        /* Process is running in terminal!  Prompt user. */
+        // Process is running in terminal! Prompt user.
         dialog = gtk_message_dialog_new(GTK_WINDOW(window),
                                         GTK_DIALOG_MODAL | GTK_DIALOG_DESTROY_WITH_PARENT,
                                         GTK_MESSAGE_WARNING,
                                         GTK_BUTTONS_CANCEL,
                                         "Close Terminal?");
         if(term->count > 1) {
-            gtk_message_dialog_format_secondary_text(GTK_MESSAGE_DIALOG(dialog), "Some tabs have a running process.  Still close?");
+            gtk_message_dialog_format_secondary_text(GTK_MESSAGE_DIALOG(dialog), "Some tabs have a running process. Still close?");
         } else {
-            gtk_message_dialog_format_secondary_text(GTK_MESSAGE_DIALOG(dialog), "Terminal has a running process.  Still close?");
+            gtk_message_dialog_format_secondary_text(GTK_MESSAGE_DIALOG(dialog), "Terminal has a running process. Still close?");
         }
         gtk_window_set_title(GTK_WINDOW(dialog), "");
         gtk_dialog_add_button(GTK_DIALOG(dialog), term->count > 1 ? "C_lose Window" : "C_lose Terminal", GTK_RESPONSE_ACCEPT);
@@ -104,7 +104,7 @@ gboolean cterm_onwindowclose(GtkWidget* window, GdkEvent* event, gpointer data) 
 
     } else {
 
-        /* Propagate event to gtk_main_quit */
+        // Propagate event to gtk_main_quit
         return FALSE;
 
     }
@@ -112,7 +112,7 @@ gboolean cterm_onwindowclose(GtkWidget* window, GdkEvent* event, gpointer data) 
 }
 
 void cterm_close_dialog_onresponse(GtkWidget* dialog, int response, gpointer data) {
-    pid_t* pid = (pid_t*) data;  /* Process to kill if not NULL */
+    pid_t* pid = (pid_t*) data;  // Process to kill if not NULL
     gtk_widget_destroy(dialog);
     if(response == GTK_RESPONSE_ACCEPT) {
         if(pid != NULL) {
@@ -134,7 +134,7 @@ void cterm_set_term_title_dialog_onresponse(GtkWidget* dialog, int response, gpo
 
     if(response == GTK_RESPONSE_OK) {
 
-        /* Get entry widget from dialog */
+        // Get entry widget from dialog
         content_area = gtk_dialog_get_content_area(GTK_DIALOG(dialog));
         list = GTK_BOX(content_area)->children;
         for(node = list; node; node = node->next) {

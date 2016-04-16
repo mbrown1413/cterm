@@ -1,14 +1,13 @@
 
 #include "cterm.h"
 
-/* This URL regex taken from gnome-terminal.
- * See top of terminal-screen.c */
+// This URL regex taken from gnome-terminal (see terminal-screen.c)
 #define HOSTCHARS_CLASS "[-[:alnum:]]"
 #define HOST HOSTCHARS_CLASS "+(\\." HOSTCHARS_CLASS "+)*"
 #define PORT "(?:\\:[[:digit:]]{1,5})?"
 #define PATHCHARS_CLASS "[-[:alnum:]\\Q_$.+!*,:;@&=?/~#%\\E]"
 #define PATHTERM_CLASS "[^\\Q]'.:}>) \t\r\n,\"\\E]"
-#define URLPATH   "(?:(/"PATHCHARS_CLASS"+(?:[(]"PATHCHARS_CLASS"*[)])*"PATHCHARS_CLASS"*)*"PATHTERM_CLASS"?)?"
+#define URLPATH "(?:(/"PATHCHARS_CLASS"+(?:[(]"PATHCHARS_CLASS"*[)])*"PATHCHARS_CLASS"*)*"PATHTERM_CLASS"?)?"
 static const char* url_regex_pattern = "(?:http://)?(?:www|ftp)" HOSTCHARS_CLASS "*\\." HOST PORT URLPATH;
 
 static GRegex* url_regex;
@@ -92,7 +91,7 @@ static void cterm_set_vte_properties(CTerm* term, VteTerminal* vte) {
         vte_terminal_set_font_from_string(vte, term->config.font);
     }
 
-    /* Highlight URLs */
+    // Highlight URLs
     if(term->config.underline_urls && url_regex == NULL) {
         url_regex = g_regex_new(url_regex_pattern, G_REGEX_CASELESS | G_REGEX_OPTIMIZE, 0, &error);
         if(error) {
@@ -132,13 +131,13 @@ bool cterm_open_tab(CTerm* term) {
                                              0, 0, 0);
     }
 
-    /* Set terminal widget properties */
+    // Set terminal widget properties
     cterm_set_vte_properties(term, new_vte);
 
-    /* Store the process id */
+    // Store the process id
     g_hash_table_insert(term->terminal_procs, (gpointer)new_vte, (gpointer)new_pid);
 
-    /* Connect VTE signals */
+    // Connect VTE signals
     g_signal_connect(new_vte, "beep", G_CALLBACK(cterm_onbeep), term);
     g_signal_connect(new_vte, "child-exited", G_CALLBACK(cterm_onchildexit), term);
     g_signal_connect(new_vte, "focus-in-event", G_CALLBACK(cterm_onfocus), term);
@@ -146,7 +145,7 @@ bool cterm_open_tab(CTerm* term) {
     g_signal_connect(new_vte, "button-release-event", G_CALLBACK(cterm_onclick), term);
     g_signal_connect(new_vte, "button-press-event", G_CALLBACK(cterm_onclick), term);
 
-    /* Set geometry information */
+    // Set geometry information
     hints.base_width = new_vte->char_width;
     hints.base_height = new_vte->char_height;
     hints.min_width = new_vte->char_width;
@@ -156,10 +155,10 @@ bool cterm_open_tab(CTerm* term) {
     gtk_window_set_geometry_hints(GTK_WINDOW(term->window), GTK_WIDGET(new_vte), &hints,
                                   GDK_HINT_RESIZE_INC | GDK_HINT_MIN_SIZE | GDK_HINT_BASE_SIZE);
 
-    /* Construct tab title */
+    // Construct tab title
     title = cterm_new_label("cterm");
 
-    /* Create scrollbar for widget */
+    // Create scrollbar for widget
     scrollbar = gtk_vscrollbar_new(new_vte->adjustment);
 
     box = gtk_hbox_new(false, 0);
@@ -169,13 +168,13 @@ bool cterm_open_tab(CTerm* term) {
     }
     gtk_widget_show_all(box);
 
-    /* Add to notebook */
+    // Add to notebook
     gtk_notebook_append_page(term->notebook, GTK_WIDGET(box), title);
     gtk_notebook_set_tab_reorderable(term->notebook, GTK_WIDGET(box), TRUE);
     gtk_notebook_set_tab_label_packing(term->notebook, GTK_WIDGET(box), TRUE, TRUE, GTK_PACK_START);
     gtk_notebook_set_current_page(term->notebook, term->count - 1);
 
-    /* Place focus in VTE */
+    // Place focus in VTE
     gtk_widget_grab_focus(GTK_WIDGET(new_vte));
 
     if(term->count == 2) {
@@ -191,13 +190,13 @@ bool cterm_close_tab(CTerm* term) {
 
     if(term->config.confirm_close_tab && cterm_vte_has_foreground_process(term, vte)) {
 
-        /* Process is running in tab!  Prompt user. */
+        // Process is running in tab! Prompt user.
         dialog = gtk_message_dialog_new(GTK_WINDOW(term->window),
                                         GTK_DIALOG_MODAL | GTK_DIALOG_DESTROY_WITH_PARENT,
                                         GTK_MESSAGE_WARNING,
                                         GTK_BUTTONS_CANCEL,
                                         "Close Tab?");
-        gtk_message_dialog_format_secondary_text(GTK_MESSAGE_DIALOG(dialog), "Tab has a running process.  Still close?");
+        gtk_message_dialog_format_secondary_text(GTK_MESSAGE_DIALOG(dialog), "Tab has a running process. Still close?");
         gtk_window_set_title(GTK_WINDOW(dialog), "");
         gtk_dialog_add_button(GTK_DIALOG(dialog), "C_lose Tab", GTK_RESPONSE_ACCEPT);
         gtk_dialog_set_default_response(GTK_DIALOG(dialog), GTK_RESPONSE_ACCEPT);
@@ -207,7 +206,7 @@ bool cterm_close_tab(CTerm* term) {
 
     } else {
 
-        /* Nothing running in tab, just kill */
+        // Nothing running in tab, just kill
         kill(*pid, SIGKILL);
 
     }
@@ -224,10 +223,10 @@ bool cterm_reload(CTerm* term) {
 
     printf("rereading configuration\n");
 
-    /* Reread configuration file */
+    // Reread configuration file
     cterm_reread_config(term, NULL);
 
-    /* Reconfigure all terminals */
+    // Reconfigure all terminals
     for(int i = 0; i < term->count; i++) {
         box = gtk_notebook_get_nth_page(term->notebook, i);
         children = gtk_container_get_children(GTK_CONTAINER(box));
@@ -271,7 +270,7 @@ bool cterm_run_external(CTerm* term) {
             pipe(fp);
 
             if(fork() == 0) {
-                /* Child */
+                // Child
                 close(fp[1]);
                 dup2(fp[0], STDIN_FILENO);
                 execlp(term->config.external_program, term->config.external_program, NULL);
@@ -339,7 +338,7 @@ bool cterm_set_term_title(CTerm* term) {
     gtk_window_set_title(GTK_WINDOW(dialog), "");
     g_signal_connect(dialog, "response", G_CALLBACK(cterm_set_term_title_dialog_onresponse), (gpointer*) term);
 
-    /* Add Entry Widget */
+    // Add Entry Widget
     content_area = gtk_dialog_get_content_area(GTK_DIALOG(dialog));
     gtk_box_pack_start(GTK_BOX(content_area), entry, true, true, 0);
     gtk_dialog_set_default_response(GTK_DIALOG(dialog), GTK_RESPONSE_OK);
