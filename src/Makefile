@@ -7,7 +7,7 @@ VTE_CFLAGS=$(shell pkg-config --cflags vte)
 
 INCLUDES=../include/cterm.h
 
-SRC_FILES=main.c actions.c events.c routines.c config.c
+SRC_FILES=main.c actions.c events.c routines.c config.c term.c
 OBJECT_FILES=$(SRC_FILES:.c=.o)
 
 ../$(BIN_NAME): $(OBJECT_FILES)

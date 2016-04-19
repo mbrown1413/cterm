@@ -70,6 +70,10 @@ typedef struct {
     } config;
 } CTerm;
 
+// term.c
+CTerm* cterm_term_new(const char* config_file, char** extra_opts);
+void cterm_term_free(CTerm* term);
+
 // actions.c
 bool cterm_switch_to_tab_1(CTerm* term);
 bool cterm_switch_to_tab_2(CTerm* term);

@@ -1,6 +1,8 @@
 
 #include "cterm.h"
 
+#define FREE_IF_NOT_NULL(x) if(x != NULL) { free(x); }
+
 static char* cterm_read_line(FILE* f);
 static void cterm_cleanse_config(CTerm* term);
 static bool cterm_config_true_value(const char* value);
@@ -72,7 +74,7 @@ void cterm_init_config_defaults(CTerm* term) {
     term->config.word_chars = NULL;
     term->config.scrollback = 1000;
     term->config.scrollbar = GTK_POLICY_ALWAYS;
-    term->config.initial_title = "cterm";
+    term->config.initial_title = NULL;
     term->config.transparent = false;
     term->config.opacity = 100;
     term->config.font = NULL;
@@ -164,20 +166,25 @@ static bool cterm_config_true_value(const char* value) {
 
 static enum cterm_length_unit cterm_config_unit_value(const char* value) {
     char* copy = strdup(value);
+    enum cterm_length_unit r;
 
     // Skip number to get to unit
-    while(*copy != '\0' && !isalpha(*copy)) {
-        copy++;
+    char* c = copy;
+    while(*c != '\0' && !isalpha(*c)) {
+        c++;
     }
 
-    cterm_string_tolower(copy);
-    if(strcmp(copy, "px") == 0) {
-        return CTERM_UNIT_PX;
-    } else if(strcmp(copy, "char") == 0) {
-        return CTERM_UNIT_CHAR;
+    cterm_string_tolower(c);
+    if(strcmp(c, "px") == 0) {
+        r = CTERM_UNIT_PX;
+    } else if(strcmp(c, "char") == 0) {
+        r = CTERM_UNIT_CHAR;
     } else {
-        return -1;
+        r = -1;
     }
+
+    free(copy);
+    return r;
 }
 
 static void cterm_config_error(unsigned short line_num, const char* error_fmt, ...) {
@@ -201,6 +208,7 @@ static bool cterm_config_process_line(CTerm* term, const char* option, const cha
 
     // Misc options
     if(strcmp(option, "word_chars") == 0) {
+        FREE_IF_NOT_NULL(term->config.word_chars);
         term->config.word_chars = strdup(value);
     } else if(strcmp(option, "scrollback") == 0) {
         term->config.scrollback = atoi(value);
@@ -211,6 +219,7 @@ static bool cterm_config_process_line(CTerm* term, const char* option, const cha
             term->config.scrollbar = GTK_POLICY_NEVER;
         }
     } else if(strcmp(option, "font") == 0) {
+        FREE_IF_NOT_NULL(term->config.font);
         term->config.font = strdup(value);
     } else if(strcmp(option, "initial_width") == 0) {
         term->config.initial_width = atoi(value);
@@ -242,8 +251,10 @@ static bool cterm_config_process_line(CTerm* term, const char* option, const cha
             }
         }
     } else if(strcmp(option, "external_program") == 0) {
+        FREE_IF_NOT_NULL(term->config.external_program);
         term->config.external_program = strdup(value);
     } else if(strcmp(option, "url_program") == 0) {
+        FREE_IF_NOT_NULL(term->config.url_program);
         term->config.url_program = strdup(value);
     } else if(strcmp(option, "underline_urls") == 0) {
         term->config.underline_urls = cterm_config_true_value(value);
@@ -252,6 +263,7 @@ static bool cterm_config_process_line(CTerm* term, const char* option, const cha
     } else if(strcmp(option, "visible_bell") == 0) {
         term->config.visible_bell = cterm_config_true_value(value);
     } else if(strcmp(option, "initial_title") == 0) {
+        FREE_IF_NOT_NULL(term->config.initial_title);
         term->config.initial_title = strdup(value);
 
     } else if(strcmp(option, "backspace_behavior") == 0) {
