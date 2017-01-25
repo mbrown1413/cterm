@@ -11,7 +11,7 @@ SRC_FILES=main.c actions.c events.c routines.c config.c term.c
 OBJECT_FILES=$(SRC_FILES:.c=.o)
 
 ../$(BIN_NAME): $(OBJECT_FILES)
-	$(CC) $(CFLAGS) $(VTE_LIBS) $(OBJECT_FILES) -o ../$(BIN_NAME)
+	$(CC) $(CFLAGS) $(OBJECT_FILES) -o ../$(BIN_NAME) $(VTE_LIBS)
 
 %.o: %.c $(INCLUDES)
 	$(CC) $(CFLAGS) $(VTE_CFLAGS) -c $< -o $@
