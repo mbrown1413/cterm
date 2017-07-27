@@ -207,7 +207,10 @@ static bool cterm_config_process_line(CTerm* term, const char* option, const cha
     GError* gerror = NULL;
 
     // Misc options
-    if(strcmp(option, "word_chars") == 0) {
+    if(strcmp(option, "initial_directory") == 0) {
+        FREE_IF_NOT_NULL(term->config.initial_directory);
+        term->config.initial_directory = strdup(value);
+    } else if(strcmp(option, "word_chars") == 0) {
         FREE_IF_NOT_NULL(term->config.word_chars);
         term->config.word_chars = strdup(value);
     } else if(strcmp(option, "scrollback") == 0) {
@@ -390,7 +393,7 @@ static int cterm_config_parse_line(char* line, unsigned short line_num, char** o
     return 0;
 }
 
-void cterm_reread_config(CTerm* term, char** extra_lines) {
+void cterm_reread_config(CTerm* term, char** extra_lines, char* initial_directory) {
     FILE* conf;
     char *option, *value;
     char* line;
@@ -476,5 +479,10 @@ void cterm_reread_config(CTerm* term, char** extra_lines) {
 
     if(term->config.keys != NULL) {
         gtk_window_add_accel_group(term->window, term->config.keys);
+    }
+
+    if(initial_directory) {
+        FREE_IF_NOT_NULL(term->config.initial_directory);
+        term->config.initial_directory = initial_directory;
     }
 }

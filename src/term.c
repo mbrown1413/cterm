@@ -3,7 +3,7 @@
 
 #define FREE_IF_NOT_NULL(x) if(x != NULL) { free(x); }
 
-CTerm* cterm_term_new(const char* config_file, char** extra_opts) {
+CTerm* cterm_term_new(const char* config_file, char** extra_opts, char* initial_directory) {
     CTerm* term = calloc(sizeof(CTerm), 1);
 
     // Initialize CTerm data structure
@@ -14,7 +14,7 @@ CTerm* cterm_term_new(const char* config_file, char** extra_opts) {
     term->config.file_name = strdup(config_file);
 
     cterm_init_config_defaults(term);
-    cterm_reread_config(term, extra_opts);
+    cterm_reread_config(term, extra_opts, initial_directory);
 
     // Set title
     if(term->config.initial_title) {

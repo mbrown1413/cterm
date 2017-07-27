@@ -15,6 +15,7 @@ int main(int argc, char** argv) {
     struct sigaction ignore_children;
     char* env_cterm_rc;
     struct passwd* user;
+    char* initial_directory = NULL;
     int n;
 
     // Avoid zombies when executing external programs by explicitly setting the
@@ -31,6 +32,12 @@ int main(int argc, char** argv) {
     g_option_context_parse(context, &argc, &argv, &gerror);
     if(gerror != NULL) {
         fprintf(stderr, "Error parsing arguments: %s\n", gerror->message);
+        exit(1);
+    }
+    if(argc == 2) {
+        initial_directory = argv[1];
+    } else if(argc != 1) {
+        fprintf(stderr, "Error: Too many positional arguments\n");
         exit(1);
     }
     g_option_context_free(context);
@@ -55,7 +62,7 @@ int main(int argc, char** argv) {
     }
 
     // Initialize CTerm data structure
-    CTerm* term = cterm_term_new(config_file, extra_opts);
+    CTerm* term = cterm_term_new(config_file, extra_opts, initial_directory);
 
     // Free config strings just used
     free(config_file);

@@ -224,7 +224,7 @@ bool cterm_reload(CTerm* term) {
     printf("rereading configuration\n");
 
     // Reread configuration file
-    cterm_reread_config(term, NULL);
+    cterm_reread_config(term, NULL, NULL);
 
     // Reconfigure all terminals
     for(int i = 0; i < term->count; i++) {

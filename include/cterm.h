@@ -71,7 +71,7 @@ typedef struct {
 } CTerm;
 
 // term.c
-CTerm* cterm_term_new(const char* config_file, char** extra_opts);
+CTerm* cterm_term_new(const char* config_file, char** extra_opts, char* initial_directory);
 void cterm_term_free(CTerm* term);
 
 // actions.c
@@ -100,7 +100,7 @@ bool cterm_set_term_title(CTerm* term);
 // config.c
 bool cterm_register_accel(CTerm* term, const char* keyspec, GCallback callback_func);
 void cterm_init_config_defaults(CTerm* term);
-void cterm_reread_config(CTerm* term, char** extra_lines);
+void cterm_reread_config(CTerm* term, char** extra_lines, char* initial_directory);
 
 // events.c
 gboolean cterm_onfocus(GtkWidget* w, GdkEventFocus* e, gpointer data);
